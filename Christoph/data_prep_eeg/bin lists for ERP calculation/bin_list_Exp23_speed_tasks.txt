@@ -1,0 +1,11 @@
+bin 1
+Average 
+.{1;11}
+
+bin 2
+Odd Trials 
+.{1}
+
+bin 3
+Even Trials 
+.{11}

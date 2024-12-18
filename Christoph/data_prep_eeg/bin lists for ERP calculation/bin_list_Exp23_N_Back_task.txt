@@ -1,0 +1,108 @@
+bin 1
+Average 1-Back Match
+.{1;11}
+
+bin 2
+Odd 1-Back Match 
+.{1}
+
+bin 3
+Even 1-Back Match
+.{11}
+
+bin 4
+Average 1-Back NoMatch 
+.{2;22}
+
+bin 5
+Odd Trials 1-Back NoMatch
+.{2}
+
+bin 6
+Even Trials 1-Back NoMatch
+.{22}
+
+bin 7
+Average 1-Back 
+.{1;11;2;22}
+
+bin 8
+Odd Trials 1-Back 
+.{1;2}
+
+bin 9
+Even Trials 1-Back 
+.{11;22}
+
+bin 10
+Average 2-Back Match
+.{3;33}
+
+bin 11
+Odd 2-Back Match 
+.{3}
+
+bin 12
+Even 2-Back Match
+.{33}
+
+bin 13
+Average 2-Back NoMatch 
+.{4;44}
+
+bin 14
+Odd Trials 2-Back NoMatch
+.{4}
+
+bin 15
+Even Trials 2-Back NoMatch
+.{44}
+
+bin 16
+Average 2-Back 
+.{3;33;4;44}
+
+bin 17
+Odd Trials 2-Back 
+.{3;4}
+
+bin 18
+Even Trials 2-Back 
+.{33;44}
+
+bin 19
+Average Overall
+.{1;11;2;22;3;33;4;44}
+
+bin 20
+Odd Trials Overall
+.{1;2;3;4}
+
+bin 21
+Even Trials Overall
+.{11;22;33;44}
+
+bin 22
+Average Match Overall
+.{1;11;3;33}
+
+bin 23
+Odd Match Overall
+.{1;3}
+
+bin 24
+Even Match Overall
+.{11;33}
+
+bin 25
+Average NoMatch Overall
+.{2;22;4;44}
+
+bin 26
+Odd Trials NoMatch Overall
+.{2;4}
+
+bin 27
+Even Trials NoMatch Overall
+.{22;44}
+

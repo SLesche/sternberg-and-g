@@ -1,0 +1,240 @@
+bin 1
+Updating 1 Steps - Memset 3 Memory Items 
+.{13;130}
+
+bin 2
+Updating 1 Steps - Memset 3 Memory Items Even
+.{13}
+
+bin 3
+Updating 1 Steps - Memset 3 Memory Items Odd
+.{130}
+
+bin 4
+Updating 1 Steps - Memset 3 Updating Items 
+.{14;140}
+
+bin 5
+Updating 1 Steps - Memset 3 Updating Items Even
+.{14}
+
+bin 6
+Updating 1 Steps - Memset 3 Updating Items Odd
+.{140}
+
+bin 7
+Updating 1 Steps - Memset 5 Memory Items 
+.{15;150}
+
+bin 8
+Updating 1 Steps - Memset 5 Memory Items Even
+.{15}
+
+bin 9
+Updating 1 Steps - Memset 5 Memory Items Odd
+.{150}
+
+bin 10
+Updating 1 Steps - Memset 5 Updating Items 
+.{16;160}
+
+bin 11
+Updating 1 Steps - Memset 5 Updating Items Even
+.{16}
+
+bin 12
+Updating 1 Steps - Memset 5  Updating Items Odd
+.{160}
+
+bin 13
+Updating 2 Steps - Memset 3 Memory Items 
+.{23;230}
+
+bin 14
+Updating 2 Steps - Memset 3 Memory Items Even
+.{23}
+
+bin 15
+Updating 2 Steps - Memset 3 Memory Items Odd
+.{230}
+
+bin 16
+Updating 2 Steps - Memset 3 Updating Items 
+.{24;240}
+
+bin 17
+Updating 2 Steps -  Memset 3 Updating Items Even
+.{24}
+
+bin 18
+Updating 2 Steps - Memset 3 Updating Items Odd
+.{240}
+
+bin 19
+Updating 2 Steps - Memset 5 Memory Items 
+.{25;250}
+
+bin 20
+Updating 2 Steps - Memset 5 Memory Items Even
+.{25}
+
+bin 21
+Updating 2 Steps - Memset 5 Memory Items Odd
+.{250}
+
+bin 22
+Updating 2 Steps - Memset 5 Updating Items 
+.{26;260}
+
+bin 23
+Updating 2 Steps - Memset 5 Updating Items Even
+.{26}
+
+bin 24
+Updating 2 Steps - Memset 5 Updating Items Odd
+.{260}
+
+bin 25
+Updating 3 Steps - Memset 3 Memory Items 
+.{33;330}
+
+bin 26
+Updating 2 Steps - Memset 3 Memory Items Even
+.{33}
+
+bin 27
+Updating 3 Steps - Memset 3 Memory Items Odd
+.{330}
+
+bin 28
+Updating 3 Steps - Memset 3 Updating Items 
+.{34;340}
+
+bin 29
+Updating 3 Steps - Memset 3 Updating Items Even
+.{34}
+
+bin 30
+Updating 3 Steps - Memset 3 Updating Items Odd
+.{340}
+
+bin 31
+Updating 3 Steps - Memset 5 Memory Items 
+.{35;350}
+
+bin 32
+Updating 3 Steps - Memset 5 Memory Items Even
+.{35}
+
+bin 33
+Updating 3 Steps - Memset 5 Memory Items Odd
+.{350}
+
+bin 34
+Updating 3 Steps - Memset 5 Updating Items 
+.{36;360}
+
+bin 35
+Updating 3 Steps - Memset 5 Updating Items Even
+.{36}
+
+bin 36
+Updating 3 Steps - Memset 5 Updating Items Odd
+.{360}
+
+bin 37
+Updating 1 Steps - Memory Items
+.{13;130;15;150}
+
+bin 38
+Updating 1 Steps - Memory Items Even
+.{13;15}
+
+bin 39
+Updating 1 Steps - Memory Items Odd
+.{130;150}
+
+bin 40
+Updating 1 Steps - Updating Items 
+.{14;140;16;160}
+
+bin 41
+Updating 1 Steps - Updating Items Even
+.{14;16}
+
+bin 42
+Updating 1 Steps - Updating Items Odd
+.{140;160}
+
+bin 43
+Updating 2 Steps - Memory Items
+.{23;230;25;250}
+
+bin 44
+Updating 2 Steps - Memory Items Even
+.{23;25}
+
+bin 45
+Updating 2 Steps - Memory Items Odd
+.{230;250}
+
+bin 46
+Updating 2 Steps - Updating Items 
+.{24;240;26;260}
+
+bin 47
+Updating 2 Steps - Updating Items Even
+.{24;26}
+
+bin 48
+Updating 2 Steps - Updating Items Odd
+.{240;260}
+
+bin 49
+Updating 3 Steps - Memory Items
+.{33;330;35;350}
+
+bin 50
+Updating 3 Steps - Memory Items Even
+.{33;35}
+
+bin 51
+Updating 3 Steps - Memory Items Odd
+.{330;350}
+
+bin 52
+Updating 3 Steps - Updating Items 
+.{34;340;36;360}
+
+bin 53
+Updating 3 Steps - Updating Items Even
+.{34;36}
+
+bin 54
+Updating 3 Steps - Updating Items Odd
+.{340;360}
+
+bin 55
+MemoryItems over all 
+.{13;130;15;150;23;230;25;250;33;330;35;350}
+
+bin 56
+Memory Items over all Even
+.{13;15;23;25;33;35}
+
+bin 57
+Memory Items over all Odd
+.{130;150,230;250;330;350}
+
+bin 58
+Updating Items over all 
+.{14;140;16;160;24;240;26;260;34;340;36;360}
+
+bin 59
+Updating Items over all Even
+.{14;16;24;26;34;36}
+
+bin 60
+Updating Items over all Odd
+.{140;160;240;260;340,360}
+

@@ -1,0 +1,6 @@
+
+*.zip
+.Rproj.user
+*.eeg
+*.vhdr
+*.vmrk

@@ -1,0 +1,35 @@
+bin 1
+Average Congruent
+.{1;11}
+
+bin 2
+Odd Trials Congruent
+.{1}
+
+bin 3
+Even Trials Congruent
+.{11}
+
+bin 4
+Average Incongruent
+.{2;22}
+
+bin 5
+Odd Trials Incongruent
+.{2}
+
+bin 6
+Even Trials Incongruent
+.{22}
+
+bin 7
+Average Overall
+.{1;11;2;22}
+
+bin 8
+Odd Trials Overall
+.{1;2}
+
+bin 9
+Even Trials Overall
+.{11;22}

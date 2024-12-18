@@ -1,0 +1,168 @@
+bin 1
+Updating 1 Memory Items 
+.{11;101;12;102;13;103;14;104}
+
+bin 2
+Updating 1 Updating Items 
+.{21;201;22;202;23;203;24;204}
+
+bin 3
+Updating 1 Memory Items Even
+.{11;12;13;14}
+
+bin 4
+Updating 1 Memory Items Odd
+.{101;102;103;104}
+
+bin 5
+Updating 1 Updating Items Even
+.{21;22;23;24}
+
+bin 6
+Updating 1 Updating Items Odd
+.{201;202;203;204}
+
+bin 7
+Updating 1 Category 1
+.{11;101;21;201}
+
+bin 8
+Updating 1 Category 2
+.{12;102;22;202}
+
+bin 9
+Updating 1 Category 3
+.{13;103;23;203}
+
+bin 10
+Updating 1 Category 4
+.{14;104;24;204}
+
+bin 11
+Updating 3 Memory Items 
+.{31;301;32;302;33;303;34;304}
+
+bin 12
+Updating 3 Updating Items 
+.{41;401;42;402;43;403;44;404}
+
+bin 13
+Updating 3 Memory Items Even
+.{31;32;33;34}
+
+bin 14
+Updating 3 Memory Items Odd
+.{301;302;303;304}
+
+bin 15
+Updating 3 Updating Items Even
+.{41;42;43;44}
+
+bin 16
+Updating 3 Updating Items Odd
+.{401;402;403;404}
+
+bin 17
+Updating 3 Category 1 
+.{31;301;41;401}
+
+bin 18
+Updating 3 Category 2 
+.{32;302;42;402}
+
+bin 19
+Updating 3 Category 3 
+.{33;303;43;403}
+
+bin 20
+Updating 3 Category 4
+.{34;304;44;404}
+
+bin 21
+Memory Items over all
+.{11;101;12;102;13;103;14;104;31;301;32;302;33;303;34;304}
+
+bin 22
+Memory Items even 
+.{11;12;13;14;31;32;33;34}
+
+bin 23
+Memory Items odd
+.{101;102;103;104;301;302;303;304}
+
+bin 24
+Updating Items over all
+.{21;201;22;202;23;203;24;204;41;401;42;402;43;403;44;404}
+
+bin 25
+Updating Items even
+.{21;22;23;24;41;42;43;44}
+
+bin 26
+Updating Items odd
+.{201;202;203;204;401;402;403;404}
+
+bin 27
+Updating 1 Category 1 Memory Items 
+.{11;101}
+
+bin 28
+Updating 1 Category 2 Memory Items 
+.{12;102}
+
+bin 29
+Updating 1 Category 3 Memory Items 
+.{13;103}
+
+bin 30
+Updating 1 Category 4 Memory Items 
+.{14;104}
+
+bin 31
+Updating 3 Category 1 Memory Items 
+.{31;301}
+
+bin 32
+Updating 3 Category 2 Memory Items 
+.{32;302}
+
+bin 33
+Updating 3 Category 3 Memory Items 
+.{33;303}
+
+bin 34
+Updating 3 Category 4 Memory Items 
+.{34;304}
+
+bin 35
+Updating 1 Category 1 Updating Items 
+.{21;201}
+
+bin 36
+Updating 1 Category 2 Updating Items 
+.{22;202}
+
+bin 37
+Updating 1 Category 3 Updating Items 
+.{23;203}
+
+bin 38
+Updating 1 Category 4 Updating Items 
+.{24;204}
+
+bin 39
+Updating 3 Category 1 Updating Items 
+.{41;401}
+
+bin 40
+Updating 3 Category 2 Updating Items 
+.{42;402}
+
+bin 41
+Updating 3 Category 3 Updating Items 
+.{43;403}
+
+bin 42
+Updating 3 Category 4 Updating Items 
+.{44;404}
+
