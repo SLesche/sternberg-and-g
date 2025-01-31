@@ -4,3 +4,8 @@
 *.eeg
 *.vhdr
 *.vmrk
+*.fdt
+*.xlsx
+*.csv
+*.set
+*.asv
