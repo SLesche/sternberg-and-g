@@ -72,7 +72,7 @@ for isubject = 1:length(subject_ids)
         EEG.setname = 'bin';
         
         % Epoch data
-        EEG = pop_epochbin( EEG , [-200.0  1000.0],  [ -200 0]);
+        EEG = pop_epochbin( EEG , [-1200.0  1000.0],  [ -1200 -1000]);
         EEG.setname =' bin_epoch';
         
         % perform CSD on copy of data set 
