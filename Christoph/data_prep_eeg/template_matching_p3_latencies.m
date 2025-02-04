@@ -19,8 +19,8 @@ PATH_MAIN = 'C:\Users\Sven\Documents\projects\research\promotion_mental_speed\st
 % 
 PATH_ERP_AV                = fullfile(PATH_MAIN, '\erp\AV/');
 
-list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
-%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
+%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
+list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
 
 arr = {};
 for i = 1:length(list_erps)
@@ -73,7 +73,7 @@ comb = combinations(possible_approaches, possible_weights, ...
 % add peak/area with no weights/normalization/penalty
 comb(end+1, :) = {"peak", "none", "none", "none", 0, component_names(1), polarity(1), electrodes, windows};
 comb(end+1, :) = {"area", "none", "none", "none", 0,  component_names(1), polarity(1), electrodes, windows};
-comb(end+1, :) = {"liesefeld_area", "none", "none", "none", 0,  component_names(1), polarity(1), electrodes, windows};
+comb(end+1, :) = {"liesefeldarea", "none", "none", "none", 0,  component_names(1), polarity(1), electrodes, windows};
 
 column_names = {'approach', 'weight', 'penalty', 'normalization', 'use_derivative', 'component_name', 'polarity', 'electrodes', 'window'};
 comb.Properties.VariableNames = column_names;
@@ -84,6 +84,13 @@ results_mat = run_template_matching(erp_data(:, :, :, 1), times, comb, 1); % Run
 
 % The results matrix will consist of 5 columns and n_subjects rows
 % the columns will be: a_param, b_param, latency, fit_cor, fit_dist
+
+liesefeld_latencies = zeros( length(ALLERP), 2);
+
+for isubject = 1:length(ALLERP)
+    liesefeld_latencies(isubject, 1) = convertCharsToStrings(ALLERP(isubject).filename);
+    liesefeld_latencies(isubject, 2) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 600], polarity, 0.5, true);
+end
 
 % Initialize the review app
 review_app

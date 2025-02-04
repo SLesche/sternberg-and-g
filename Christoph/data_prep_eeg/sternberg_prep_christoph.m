@@ -110,6 +110,8 @@ parfor isubject = 1:length(subject_ids)
 
         % Save original channel locations
         EEG.chanlocs_original = EEG.chanlocs;
+        EEG.eog_chans = [33 34];
+            EEG.eog_chans_n = length(EEG.eog_chans);
 
         idLabelKeys = [
             "S 31", "fix";
@@ -180,144 +182,114 @@ parfor isubject = 1:length(subject_ids)
         EEG = pop_resample(EEG, 500);
         ICA = pop_resample(ICA, 200);
 
-        % zero-phase Hamming window FIR-filter
-        EEG = pop_eegfiltnew(EEG, 'locutoff',0.1, 'hicutoff', 70, 'plotfreqz',0);
-        ICA = pop_eegfiltnew(EEG, 'locutoff',1, 'hicutoff', 70, 'plotfreqz',0);
+         % Bandpass filter data (ERPlab toolbox function)
+        EEG = pop_basicfilter(EEG, [1 : EEG.nbchan], 'Cutoff', [0.1, 30], 'Design', 'butter', 'Filter', 'bandpass', 'Order', 2, 'RemoveDC', 'on', 'Boundary', 'boundary');
+        ICA = pop_basicfilter(ICA, [1 : EEG.nbchan], 'Cutoff', [1, 30], 'Design', 'butter', 'Filter', 'bandpass', 'Order', 2, 'RemoveDC', 'on', 'Boundary', 'boundary');
+        
+         % Bad channel detection EEG  on base of filltering
+        [EEG, i1] = pop_rejchan(EEG, 'elec', [1 : (EEG.nbchan-EEG.eog_chans_n)], 'threshold', 10, 'norm', 'on', 'measure', 'kurt');
+        [EEG, i2] = pop_rejchan(EEG, 'elec', [1 : (EEG.nbchan-EEG.eog_chans_n)], 'threshold', 5, 'norm', 'on', 'measure', 'prob');
+        rejected_channels = horzcat(i1, i2);
+        EEG.rejected_channels = horzcat(i1, i2);
+        EEG.chans_rejected_n = length(horzcat(i1, i2));
+        
+         % Bad channel detection ICA on base of filltering
+        [ICA, i3] = pop_rejchan(ICA, 'elec', [1 : (ICA.nbchan-ICA.eog_chans_n)], 'threshold', 10, 'norm', 'on', 'measure', 'kurt');
+        [ICA, i4] = pop_rejchan(ICA, 'elec', [1 : (ICA.nbchan-ICA.eog_chans_n)], 'threshold', 5, 'norm', 'on', 'measure', 'prob');
+        rejected_channels = horzcat(i3, i4);
+        ICA.rejected_channels = horzcat(i3, i4);
+        ICA.chans_rejected_n = length(horzcat(i3, i4));
 
-        % remove line noise
-        EEG = pop_cleanline(EEG, 'bandwidth',2,'chanlist',[1:34] ,'computepower',1,'linefreqs',50,'newversion',0,'normSpectrum',0,'p',0.01,'pad',2,'plotfigures',0,'scanforlines',0,'sigtype','Channels','taperbandwidth',2,'tau',100,'verb',1,'winsize',4,'winstep',1);
-        ICA = pop_cleanline(ICA, 'bandwidth',2,'chanlist',[1:34] ,'computepower',1,'linefreqs',50,'newversion',0,'normSpectrum',0,'p',0.01,'pad',2,'plotfigures',0,'scanforlines',0,'sigtype','Channels','taperbandwidth',2,'tau',100,'verb',1,'winsize',4,'winstep',1);
 
-        % bad channel detection
-        % set criteria
-        crit_z = 3.29; % Tabachnik & Fiedell, 2007 p. 73: Outlier detection criteria
-        [~, indelec1_EEG] = pop_rejchan(EEG, 'elec',[1:32,EEG.nbchan] ,'threshold',crit_z,'norm','on','measure','prob');%we look for probability
-        [~, indelec2_EEG] = pop_rejchan(EEG, 'elec',[1:32,EEG.nbchan] ,'threshold',crit_z,'norm','on','measure','kurt');%we look for kurtosis
-        [~, indelec3_EEG] = pop_rejchan(EEG, 'elec',[1:32,EEG.nbchan] ,'threshold',crit_z,'norm','on','measure','spec','freqrange',[1 125] );	%we look for frequency spectra
-
-
-        [~, indelec1_ICA] = pop_rejchan(ICA, 'elec',[1:32,EEG.nbchan] ,'threshold',crit_z,'norm','on','measure','prob');%we look for probability
-        [~, indelec2_ICA] = pop_rejchan(ICA, 'elec',[1:32,EEG.nbchan] ,'threshold',crit_z,'norm','on','measure','kurt');%we look for kurtosis
-        [~, indelec3_ICA] = pop_rejchan(ICA, 'elec',[1:32,EEG.nbchan] ,'threshold',crit_z,'norm','on','measure','spec','freqrange',[1 125] );	%we look for frequency spectra
-
-        % check whether a channel is bad in multiple criteria
-        index_EEG=sort(unique([indelec1_EEG,indelec2_EEG,indelec3_EEG])); %index is the bad channel array
-
-        % check whether a channel is bad in multiple criteria
-        index_ICA=sort(unique([indelec1_ICA,indelec2_ICA,indelec3_ICA])); %index is the bad channel array
-
-        if ismember(33, index_EEG)
-            index_EEG(index_EEG == 33) = [];
-        end
-        if ismember(34, index_EEG)
-            index_EEG(index_EEG == 34) = [];
-        end
-        if ismember(33, index_ICA)
-            index_ICA(index_ICA == 33) = [];
-        end
-        if ismember(34, index_ICA)
-            index_ICA(index_ICA == 34) = [];
-        end
-
-        % save number of rejected channels
-        preprostats.nbchanrej_ICA=length(index_ICA);
-        preprostats.nbchanrej_EEG=length(index_EEG);
-
-        Channelrej = cellstr(num2str(reshape(index_EEG, [1,length(index_EEG)])));%first column = rejected chans EEG
-        Channelrej(1,2) = cellstr(num2str(reshape(index_ICA, [1,length(index_ICA)])));%first column = rejected chans ICA
-
-        %interpolate rejected channels
-        EEG = pop_interp(EEG, index_EEG, 'spherical');
-        ICA = pop_interp(ICA,  index_ICA, 'spherical');
-
-        %save correct channel location
-        EEG.chanlocs = EEG.chanlocs_original;
-
+        % Interpolate data channels
+        EEG = pop_interp(EEG, EEG.chanlocs_original, 'spherical');
+        ICA = pop_interp(ICA, ICA.chanlocs_original, 'spherical');
+        
         % re-reference data
+
+       
         EEG = pop_chanedit(EEG, 'append',EEG.nbchan,'changefield',{EEG.nbchan+1 'labels' 'Cz'},'changefield',{EEG.nbchan+1 'sph_theta' '0'},'changefield',{EEG.nbchan+1 'sph_phi' '90'},'changefield',{EEG.nbchan+1 'sph_radius' '85'},'convert',{'sph2all'});
         EEG = pop_chanedit(EEG, 'setref',{'1:34' 'Cz'});
-
+                
         ICA = pop_chanedit(ICA, 'append',ICA.nbchan,'changefield',{ICA.nbchan+1 'labels' 'Cz'},'changefield',{ICA.nbchan+1 'sph_theta' '0'},'changefield',{ICA.nbchan+1 'sph_phi' '90'},'changefield',{ICA.nbchan+1 'sph_radius' '85'},'convert',{'sph2all'});
         ICA = pop_chanedit(ICA, 'setref',{'1:34' 'Cz'});
-
-        % compute average reference to keep reference channel in data
-        EEG = pop_reref( EEG, [],'exclude',[33 34],'refloc',struct('labels',{'Cz'},'sph_radius',{85},'sph_theta',{0},'sph_phi',{90},'theta',{0},'radius',{0},'X',{5.2047e-15},'Y',{0},'Z',{85},'type',{''},'ref',{'Cz'},'urchan',{[]},'datachan',{0},'sph_theta_besa',{0},'sph_phi_besa',{90}));
-        ICA = pop_reref( ICA, [],'exclude',[33 34],'refloc',struct('labels',{'Cz'},'sph_radius',{85},'sph_theta',{0},'sph_phi',{90},'theta',{0},'radius',{0},'X',{5.2047e-15},'Y',{0},'Z',{85},'type',{''},'ref',{'Cz'},'urchan',{[]},'datachan',{0},'sph_theta_besa',{0},'sph_phi_besa',{90}));
-
+                
+        %average reference
+        EEG = pop_reref( EEG, [],'exclude',EEG.eog_chans,'refloc',struct('labels',{'Cz'},'sph_radius',{85},'sph_theta',{0},'sph_phi',{90},'theta',{0},'radius',{0},'X',{5.2047e-15},'Y',{0},'Z',{85},'type',{''},'ref',{'Cz'},'urchan',{[]},'datachan',{0},'sph_theta_besa',{0},'sph_phi_besa',{90}));
+        ICA = pop_reref( ICA, [],'exclude',EEG.eog_chans,'refloc',struct('labels',{'Cz'},'sph_radius',{85},'sph_theta',{0},'sph_phi',{90},'theta',{0},'radius',{0},'X',{5.2047e-15},'Y',{0},'Z',{85},'type',{''},'ref',{'Cz'},'urchan',{[]},'datachan',{0},'sph_theta_besa',{0},'sph_phi_besa',{90}));
+                
+       
         % check data rank
-        dataRank = sum(eig(cov(double(ICA.data'))) > 1E-6); % 1E-6 follows pop_runica() line 531, changed from 1E-7.
+        dataRank = sum(eig(cov(double(ICA.data'))) > 1E-6); % 1E-6 follows pop_runica(), changed from 1E-7.
 
         EEG = pop_selectevent( EEG, 'type',{'include'},'deleteevents','on');
         ICA = pop_selectevent( ICA, 'type',{'include'},'deleteevents','on');
 
-        EEG = pop_epoch(EEG, {'include'}, [-0.2, 1.0], 'epochinfo', 'yes');
-        ICA = pop_epoch(ICA, {'include'}, [0, 1.5], 'epochinfo', 'yes');
-
-        % save information on rejected data epochs
-        preprostats.EEG_epoch_total = EEG.event(end).epoch;
-        preprostats.ICA_epoch_total = ICA.event(end).epoch;
-
-        % Automated detection and removal of bad epochs
-        EEG.segs_original_n = size(EEG.data, 3);
-        [EEG, rejsegs] = pop_autorej(EEG, 'nogui', 'on', 'threshold', 1000, 'startprob', 5, 'maxrej', 5, 'eegplot', 'off');
-        EEG.segs_rejected = length(rejsegs);
-
-        ICA.segs_original_n = size(ICA.data, 3);
-        [ICA, rejsegs] = pop_autorej(ICA, 'nogui', 'on', 'threshold', 1000, 'startprob', 5, 'maxrej', 5, 'eegplot', 'off');
-        ICA.segs_rejected = length(rejsegs);
-
-        % List of unique labels and conditions in the EEG.event
-        uniqueLabels = unique({EEG.event.label});  % Get all unique event labels
+        % Epoch both datasets 
+        EEG = pop_epoch(EEG, {'include'}, [-0.2, 1.0], 'newname', [subject '_stimseg'], 'epochinfo', 'yes');
+        ICA = pop_epoch(ICA, {'include'}, [-0.2, 1.0], 'newname', [subject '_stimseg'], 'epochinfo', 'yes');
         
-        % Loop through each label and each condition
-        for ilabel = 1:length(uniqueLabels)
-            % Get the label and condition combination
-            label = uniqueLabels{ilabel};
+        % Detect artifacted epochs EEG
+        
+        EEG_segs_orginal_n = size(EEG.data, 3);
+        thresh = 1000;
+        prob = 5;
+        maxr = 5;
+        [EEG, rejected_segments_EEG] = pop_autorej(EEG, 'nogui', 'on', 'threshold',thresh, 'startprob', prob, 'maxrej', maxr, 'eegplot','off');
+        EEG.segs_rejected_before_ica = length(rejected_segments_EEG);
+        
+        % Detect artifacted epochs ICA
+        
+        ICA_segs_orginal_n = size(ICA.data, 3);
+        thresh = 1000;
+        prob = 5;
+        maxr = 5;
+        [ICA, rejected_segments_ICA] = pop_autorej(ICA, 'nogui', 'on', 'threshold',thresh, 'startprob', prob, 'maxrej', maxr, 'eegplot','off');
+        
+        % Check if length of remaining data exceeds 30 minutes
+        if ceil(size(EEG.data, 3) * 1.2) >= 1800 %1.2 = Sekunden/Epoche
             
-            % Count the number of occurrences of this label-condition combination
-            count = length(find(ismember({EEG.event.label}, label)));
-            
-            % Store the count in the preprostats structure dynamically
-            fieldName = sprintf('EEG_epoch_%s', label);
-            preprostats.(fieldName) = count;
+            % Selecting a random sample of epochs with 30 minutes length
+            ICA = pop_select(ICA, 'trial', randsample(1 : size(ICA.data, 3), ceil(1800 / 1.2)));
         end
 
-        %save ICA data set
-        ICA = pop_saveset(ICA, 'filename', [subject '_ic_set.set'], 'filepath', PATH_ICSET, 'check', 'on', 'savemode', 'twofiles');
-
-        %run ICA
-        ICA = pop_runica(ICA, 'extended', 1, 'interupt', 'on', 'pca', dataRank);
-        ICA = pop_saveset(ICA, 'filename', [subject '_weights.set'], 'filepath', PATH_ICWEIGHTS, 'check', 'on', 'savemode', 'twofiles');
-
-        % Run IClabel
-        ICA = iclabel(ICA, 'default');
-        ICA.ICout_IClabel = find(ICA.etc.ic_classification.ICLabel.classifications(:, 1) < 0.5);
-
+        %% Run ICA on ICA dataset
+        ICA = pop_runica(ICA, 'extended', 1, 'interupt', 'on', 'pca', dataRank);  
+        ICA.icaact = reshape((ICA.icaweights*ICA.icasphere)*ICA.data(ICA.icachansind,:),[dataRank size(ICA.data,2) size(ICA.data,3)]);
+        
+        
         % Copy IC weights to highpass filtered data (at 0.1 Hz)
         EEG.icachansind = ICA.icachansind;
         EEG.icaweights =ICA.icaweights;
         EEG.icasphere = ICA.icasphere;
         EEG.icawinv =  ICA.icawinv;
+        EEG.icaact = ICA.icaact;
+        EEG = pop_saveset(EEG, 'filename', [num2str(subject) '_Sternberg_icdata.set'], 'filepath', PATH_ICWEIGHTS, 'check', 'on', 'savemode', 'twofiles');
+
+       % Run IClabel
+      %  ICA = iclabel(ICA, 'default');
+        ICA = pop_iclabel(ICA, 'default');
+        ICA.ICout_IClabel = find(ICA.etc.ic_classification.ICLabel.classifications(:, 1) < 0.5);
         EEG.ICout_IClabel = ICA.ICout_IClabel;
-
-        % compute IC activation matrix
-        EEG = eeg_checkset(EEG, 'ica');
-
-        % Remove components
-        EEG = pop_subcomp(EEG, EEG.ICout_IClabel);
-        preprostats.icout = length(EEG.ICout_IClabel);
-
+        rejected_ICs = length(EEG.ICout_IClabel);
+        EEG.n_rejected_ICs  =  rejected_ICs;
+        
+        
+        % Remove bad components detected IC lable
+       
+        EEG = pop_subcomp(EEG, EEG.ICout_IClabel, 0);
+     %  Automatically reject epochs after running ICA
+        EEG_segs_after_n = size(EEG.data, 3);
+       [EEG, segs_rej] = pop_autorej(EEG, 'nogui', 'on', 'threshold', 1000, 'startprob', 5, 'maxrej', 5);
+       
+        EEG.segs_rejected_after_ica = length(segs_rej); 
+        EEG.segs_rejected_overall_percentage = (EEG.segs_rejected_before_ica + EEG.segs_rejected_after_ica);
+        
         %remove baseline
         %EEG = pop_rmbase(EEG, [-200 0]); 
 
         %save cleaned EEG data set
-        EEG = pop_saveset(EEG, 'filename', [subject '_autocleaned.set'], 'filepath', PATH_AUTOCLEANED, 'check', 'on', 'savemode', 'twofiles');
-
-        % write stats
-        preprostats_table = struct2table(preprostats);
-        writetable(preprostats_table, [PATH_PREPROSTATS '\preprostats_' subject '.csv'])
-        writecell(Channelrej(:,:), [PATH_PREPROSTATS '\channels_rej_' subject '.xlsx']);
-
+        EEG = pop_saveset(EEG, 'filename', [subject '_autocleaned_christoph.set'], 'filepath', PATH_AUTOCLEANED, 'check', 'on', 'savemode', 'twofiles');
     end
 end
 
