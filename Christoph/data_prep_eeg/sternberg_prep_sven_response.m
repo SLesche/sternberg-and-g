@@ -11,7 +11,7 @@ addpath('C:\Users\Sven\Documents\projects\research\promotion_mental_speed\decisi
 
 raw_data_ids = getIdsFromFolder(PATH_RAW_DATA, '\.vhdr$', '(\d+)\.vhdr$');
 
-autoclean_ids = getIdsFromFolder(fullfile(PATH_MAIN,'autocleaned'), '\d+_autocleaned\.fdt$', '^(\d+)_auto');
+autoclean_ids = getIdsFromFolder(fullfile(PATH_MAIN,'autocleaned'), '\d+_autocleaned_response\.fdt$', '^(\d+)_auto');
 
 subject_ids = setdiff(raw_data_ids, autoclean_ids);
 subject_ids = subject_ids(subject_ids < 152);
@@ -141,7 +141,7 @@ parfor isubject = 1:length(subject_ids)
         EEG = flagIncorrectTrials(EEG, incorrect_labels);
 
         include_labels = {
-            'memset_match', 'memset_nomatch', 'probe_match', 'probe_nomatch'
+            'resp_correct_d', 'resp_correct_l',
             % 'resp_probe_correct', 'resp_memset_correct'
             };
 
@@ -249,8 +249,8 @@ parfor isubject = 1:length(subject_ids)
         EEG = pop_selectevent( EEG, 'type',{'include'},'deleteevents','on');
         ICA = pop_selectevent( ICA, 'type',{'include'},'deleteevents','on');
 
-        EEG = pop_epoch(EEG, {'include'}, [-0.2, 1.0], 'epochinfo', 'yes');
-        ICA = pop_epoch(ICA, {'include'}, [0, 1.5], 'epochinfo', 'yes');
+        EEG = pop_epoch(EEG, {'include'}, [-1.2, 1.0], 'epochinfo', 'yes');
+        ICA = pop_epoch(ICA, {'include'}, [-1, 1], 'epochinfo', 'yes');
 
         % save information on rejected data epochs
         preprostats.EEG_epoch_total = EEG.event(end).epoch;
@@ -282,11 +282,11 @@ parfor isubject = 1:length(subject_ids)
         end
 
         %save ICA data set
-        ICA = pop_saveset(ICA, 'filename', [subject '_ic_set.set'], 'filepath', PATH_ICSET, 'check', 'on', 'savemode', 'twofiles');
+        ICA = pop_saveset(ICA, 'filename', [subject '_ic_set_response.set'], 'filepath', PATH_ICSET, 'check', 'on', 'savemode', 'twofiles');
 
         %run ICA
         ICA = pop_runica(ICA, 'extended', 1, 'interupt', 'on', 'pca', dataRank);
-        ICA = pop_saveset(ICA, 'filename', [subject '_weights.set'], 'filepath', PATH_ICWEIGHTS, 'check', 'on', 'savemode', 'twofiles');
+        ICA = pop_saveset(ICA, 'filename', [subject '_weights_response.set'], 'filepath', PATH_ICWEIGHTS, 'check', 'on', 'savemode', 'twofiles');
 
         % Run IClabel
         ICA = iclabel(ICA, 'default');
@@ -310,12 +310,12 @@ parfor isubject = 1:length(subject_ids)
         %EEG = pop_rmbase(EEG, [-200 0]); 
 
         %save cleaned EEG data set
-        EEG = pop_saveset(EEG, 'filename', [subject '_autocleaned.set'], 'filepath', PATH_AUTOCLEANED, 'check', 'on', 'savemode', 'twofiles');
+        EEG = pop_saveset(EEG, 'filename', [subject '_autocleaned_response.set'], 'filepath', PATH_AUTOCLEANED, 'check', 'on', 'savemode', 'twofiles');
 
         % write stats
         preprostats_table = struct2table(preprostats);
-        writetable(preprostats_table, [PATH_PREPROSTATS '\preprostats_' subject '.csv'])
-        writecell(Channelrej(:,:), [PATH_PREPROSTATS '\channels_rej_' subject '.xlsx']);
+        writetable(preprostats_table, [PATH_PREPROSTATS '\preprostats_response_' subject '.csv'])
+        writecell(Channelrej(:,:), [PATH_PREPROSTATS '\channels_rej_response_' subject '.xlsx']);
 
     end
 end
