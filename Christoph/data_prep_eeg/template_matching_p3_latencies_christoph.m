@@ -17,10 +17,10 @@ PATH_MAIN = 'C:\Users\Sven\Documents\projects\research\promotion_mental_speed\st
 % PATH_ERP_AV                = fullfile(PATH_MAIN, 'AV\t1/');
 % PATH_ERP_SL                = fullfile(PATH_MAIN, 'SL\t1/');
 % 
-PATH_ERP_AV                = fullfile(PATH_MAIN, '\erp\AV/');
+PATH_ERP_AV                = fullfile(PATH_MAIN, '\erp\original/');
 
 %list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
-list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
+list_erps = dir(fullfile(PATH_ERP_AV, '**', '*.erp'));
 
 arr = {};
 for i = 1:length(list_erps)
@@ -34,6 +34,7 @@ GA =  pop_gaverager( ...
             'ExcludeNullBin', 'on', 'SEM', 'on');
 
 times = GA.times;
+plot(times, GA.bindata(11, :, 1))
 
 erp_data = zeros([length(ALLERP) size(GA.bindata)]);
 
@@ -44,11 +45,11 @@ end
 [n_subjects, n_chans, n_times, n_bins] = size(erp_data);
 
 % Convert to cell array with conditionsXn_subject entries 
-component_names = ["p3_sternberg_probe"];
+component_names = ["p3_sternberg_christoph"];
 n_components = length(component_names);
 electrodes = [11]; % We only have one electrode saved in example data
 polarity = ["positive"];
-windows = {[250 700]};
+windows = {[250 800]};
 
 % For fitting
 possible_approaches = ["minsq"];
@@ -75,19 +76,20 @@ column_names = {'approach', 'weight', 'penalty', 'normalization', 'use_derivativ
 comb.Properties.VariableNames = column_names;
 
 % If you can use the Parallel Computing Toolbox
-results_mat = run_template_matching(erp_data(:, :, :, 2), times, comb, 1); % Run the third (3) method saved in comb. You can run any 
+results_mat = run_template_matching(erp_data(:, :, :, 1), times, comb, 1); % Run the third (3) method saved in comb. You can run any 
 % results_mat = run_template_matching_serial(erp_data, time_vec, comb, 3); % Much slower!
 
 % The results matrix will consist of 5 columns and n_subjects rows
 % the columns will be: a_param, b_param, latency, fit_cor, fit_dist
-writematrix(squeeze(results_mat), "probe_p3_automatic.csv")
-liesefeld_latencies = zeros( length(ALLERP), 2);
 
+liesefeld_latencies = zeros( length(ALLERP), 1);
+subject_order = strings(length(ALLERP), 1);
 for isubject = 1:length(ALLERP)
-    liesefeld_latencies(isubject, 1) = convertCharsToStrings(ALLERP(isubject).filename);
-    liesefeld_latencies(isubject, 2) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 600], polarity, 0.5, true);
+    subject_order(isubject) = convertCharsToStrings(ALLERP(isubject).filename);
+    liesefeld_latencies(isubject, 1) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 600], polarity, 0.5, true);
 end
 
+writematrix(subject_order, "subject_order_christoph.csv")
 % Initialize the review app
 review_app
 

@@ -10,8 +10,8 @@ PATH_MAIN = 'C:\Users\Sven\Documents\projects\research\promotion_mental_speed\st
 % 
 PATH_ERP_AV                = fullfile(PATH_MAIN, '\erp\AV/');
 
-list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
-%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
+%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
+list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
 
 arr = {};
 for i = 1:length(list_erps)
@@ -39,7 +39,7 @@ ax.XAxisLocation = 'origin';
 ax.YAxisLocation = 'origin';
 set(gca, 'TickDir', 'in')
 ax.XRuler.TickLabelGapOffset = -30;
-
+ylim([-1 9])
 % Adjust tick label font size
 ax.FontSize = 12; % Adjust font size for both x and y axis tick labels
 

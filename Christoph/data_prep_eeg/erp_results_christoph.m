@@ -10,15 +10,15 @@ PATH_MAIN = 'C:\Users\Sven\Documents\projects\research\promotion_mental_speed\st
 % 
 PATH_ERP_AV                = fullfile(PATH_MAIN, '\erp\AV/');
 PATH_ORIGINAL = fullfile(PATH_MAIN, '\erp\original\');
-list_erps = dir(fullfile(PATH_ERP_AV, '**', '*Sternberg*.erp'));
-%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
+%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp_christoph*.erp'));
+list_erps = dir(fullfile(PATH_ORIGINAL, '**', '*.erp'));
 
 arr = {};
 for i = 1:length(list_erps)
     arr{i} = fullfile(list_erps(i).name);
 end
 
-[ERP ALLERP] = pop_loaderp('filename', arr, 'filepath', PATH_ERP_AV);
+[ERP ALLERP] = pop_loaderp('filename', arr, 'filepath', PATH_ORIGINAL);
 
 GA =  pop_gaverager( ...
             ALLERP, 'DQ_flag', 0, 'Erpsets', 1:length(ALLERP),...
