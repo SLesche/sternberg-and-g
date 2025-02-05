@@ -81,14 +81,19 @@ results_mat = run_template_matching(erp_data(:, :, :, 2), times, comb, 1); % Run
 % The results matrix will consist of 5 columns and n_subjects rows
 % the columns will be: a_param, b_param, latency, fit_cor, fit_dist
 writematrix(squeeze(results_mat), "probe_p3_automatic.csv")
-liesefeld_latencies = zeros( length(ALLERP), 2);
+
+old_latencies = zeros(length(ALLERP), 3);
 
 for isubject = 1:length(ALLERP)
-    liesefeld_latencies(isubject, 1) = convertCharsToStrings(ALLERP(isubject).filename);
-    liesefeld_latencies(isubject, 2) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 600], polarity, 0.5, true);
+    old_latencies(isubject, 1) = approx_peak_latency(times, erp_data(isubject, 11, :, 2), [250 900], polarity);
+    old_latencies(isubject, 2) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 700], polarity, 0.5);
+    old_latencies(isubject, 3) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 700], polarity, 0.5, true);
 end
 
+writematrix(squeeze(liesefeld_latencies), "probe_p3_old.csv")
+
 % Initialize the review app
-review_app
+%review_app
 
 raw_data_ids = getIdsFromFolder(PATH_ERP_AV, '*erp_response*.erp', '^(\d+)_');
+
