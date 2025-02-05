@@ -8,157 +8,105 @@ data <- read.csv("Christoph/raw_data_behavior/z_abilities.txt", sep = " ")
 
 path_to_eeg <- "Christoph/data_prep_eeg/"
 
-memset_p3 <- read.csv(paste0(path_to_eeg, "memset_p3_latencies.csv"), header = FALSE)
-probe_p3 <- read.csv(paste0(path_to_eeg, "probe_p3_latencies.csv"), header = FALSE)
-response_p3 <- read.csv(paste0(path_to_eeg, "response_p3_latencies.csv"), header = FALSE)
-liesefeld_probe_p3 <- read.csv(paste0(path_to_eeg, "probe_p3_liesefeld.csv"), sep = "", header = FALSE)
-probe_p3_christoph <-  read.csv(paste0(path_to_eeg, "probe_p3_christoph.csv"), header = FALSE)
-probe_p3_auto <-  read.csv(paste0(path_to_eeg, "probe_p3_automatic.csv"), header = FALSE)
-
 subject_order <- read.csv(paste0(path_to_eeg, "subject_order.csv"), header = FALSE)
 subject_order_christoph <-  read.csv(paste0(path_to_eeg, "subject_order_christoph.csv"), header = FALSE)
 
 
-colnames(memset_p3) = c("aparam_memset", "bparam_memset", "latency_memset", "fitcor_memset", "fitdist_memset", "review_memset")
-colnames(probe_p3) = c("aparam_probe", "bparam_probe", "latency_probe", "fitcor_probe", "fitdist_probe", "review_probe")
-colnames(response_p3) = c("aparam_response", "bparam_response", "latency_response", "fitcor_response", "fitdist_response", "review_response")
-colnames(probe_p3_christoph) = c("aparam_christoph", "bparam_christoph", "latency_christoph", "fitcor_christoph", "fitdist_christoph")
-colnames(probe_p3_auto) = c("aparam_probeauto", "bparam_probeauto", "latency_probeauto", "fitcor_probeauto", "fitdist_probeauto")
+response_p3 <- read.csv(paste0(path_to_eeg, "response_p3_automatic_odd_even.csv"), header = FALSE) 
+stims_p3 <- read.csv(paste0(path_to_eeg, "stims_p3_automatic_odd_even.csv"), header = FALSE) 
+christoph_p3 <-  read.csv(paste0(path_to_eeg, "stims_p3_automatic_odd_even_christoph.csv"), header = FALSE) 
 
-memset_p3$Subject = subject_order$V1
-probe_p3$Subject = subject_order$V1
-response_p3$Subject = subject_order$V1
-liesefeld_probe_p3$Subject <- subject_order$V1
-probe_p3_christoph$Subject <- subject_order_christoph$V1
-probe_p3_auto$Subject <- subject_order$V1
+colnames(response_p3) = c("bin", "erp_num", "aparam", "bparam", "latency", "fitcor", "fitdist")
+colnames(stims_p3) = c("bin", "erp_num", "aparam", "bparam", "latency", "fitcor", "fitdist")
+colnames(christoph_p3) = c("bin", "erp_num", "aparam", "bparam", "latency", "fitcor", "fitdist")
 
-data %>% 
-  left_join(., probe_p3_christoph %>% 
-              mutate(Subject = as.numeric(str_extract(Subject, "\\d+")))) %>% 
-  filter(fitcor_christoph > 0.6) %>%
-  select(latency_christoph, starts_with("z")) %>% cor(., use = "pairwise.complete.obs")
+cutoff = 0.3
+response_p3 <- response_p3 %>% 
+  mutate(
+    latency = ifelse(fitcor < cutoff, NA, latency),
+  ) %>% 
+  pivot_wider(names_from = bin, id_cols = erp_num, values_from = -c(bin, erp_num), names_prefix = "response_bin") %>% 
+  mutate(Subject = subject_order$V1)
+
+stims_p3 <- stims_p3 %>% 
+  mutate(
+    latency = ifelse(fitcor < cutoff, NA, latency),
+  ) %>% 
+  pivot_wider(names_from = bin, id_cols = erp_num, values_from = -c(bin, erp_num), names_prefix = "stims_bin") %>%
+  mutate(Subject = subject_order$V1)
+
+christoph_p3 <- christoph_p3 %>% 
+  mutate(
+    latency = ifelse(fitcor < cutoff, NA, latency),
+  ) %>% 
+  pivot_wider(names_from = bin, id_cols = erp_num, values_from = -c(bin, erp_num), names_prefix = "christoph_bin") %>%
+  mutate(Subject = parse_number(subject_order_christoph$V1))
 
 full_data <- data %>% 
-  left_join(., memset_p3) %>% 
-  left_join(., probe_p3) %>% 
-  left_join(., response_p3) %>% 
-  left_join(., liesefeld_probe_p3) %>% 
-  left_join(., probe_p3_auto) %>% 
-  left_join(., probe_p3_christoph %>% 
-                                               mutate(Subject = as.numeric(str_extract(Subject, "\\d+"))))
+  left_join(., stims_p3, by = "Subject") %>% 
+  left_join(., response_p3, by = "Subject") %>% 
+  left_join(., christoph_p3, by = "Subject") 
+
+replace_outliers <- function(vector){
+  z_stand = scale(vector)[, 1]
+  
+  vector[z_stand > 3 | z_stand < -3] = NA
+  
+  print(c(sum(z_stand > 3 | z_stand < -3, na.rm = TRUE), " outliers replaced"))
+  
+  return(vector)
+}
 
 clean_data <- full_data %>% 
   mutate(
-    latency_memset = ifelse(review_memset == -1, NA, latency_memset),
-    latency_probe = ifelse(review_memset == -1, NA, latency_probe),
-    latency_response = ifelse(review_memset == -1, NA, latency_response),
-    latency_christoph = ifelse(fitcor_christoph < 0.6, NA, latency_christoph),
-    latency_probeauto = ifelse(fitcor_probeauto < 0.6, NA, latency_probeauto)
+    across(
+      contains("latency"),
+      replace_outliers
+    )
   ) %>% 
   mutate(
-    z_latency_memset = scale(latency_memset)[,1 ],
-    z_latency_probe = scale(latency_probe)[,1 ],
-    z_latency_response = scale(latency_response)[,1 ],
-    z_latency_liesefeld = scale(V1)[, 1],
-    z_latency_probeauto = scale(latency_probeauto)[, 1]
+    across(
+      contains("latency"),
+      ~scale(.)[, 1],
+      .names = "z_{.col}"
+    )
   )
 
-cor(clean_data %>% filter(review_probe == 2) %>% select(contains("latency"), starts_with("z")), use="pairwise.complete.obs") %>% View()
+# cor(clean_data %>% select(contains("latency"), starts_with("z")), use="pairwise.complete.obs") %>% View()
+hist(clean_data$latency_stims_bin1)
+hist(clean_data$latency_stims_bin2)
 
-model_sternberg_memset <- c(# hierarchical model
-  "ERP =~ 1*z_latency_memset",
-  
-  # cognitive abilities
-  "gf =~ zPC + zPS + zM + zC",
-  
-  # structural model
-  "ERP ~~ gf",
-  
-  # fix intercepts to zero
-  "z_latency_memset ~ 0",
-  "zPC ~ 0",
-  "zPS ~ 0",
-  "zM ~ 0",
-  "zC ~ 0"
-  
-  # variances
-  # "ERP ~~ v_erp*ERP",
-  # "z_latency_memset ~~ v_S_P3*z_latency_memset"
-)
+cor(clean_data %>% select(starts_with("latency_stims")), use = "pairwise.complete.obs") 
+cor(clean_data %>% select(starts_with("latency_response")), use = "pairwise.complete.obs") 
+cor(clean_data %>% select(starts_with("latency_christoph")), use = "pairwise.complete.obs") 
 
-fit_sternberg_memset <- sem(model_sternberg_memset, data = clean_data %>% filter(review_memset == 2), estimator = "MLR" , missing="fiml", std.lv = FALSE)
-summary(fit_sternberg_memset, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
+fit_sem <- function(data, param_name){
+  model = c(# hierarchical model
+    paste0("ERP =~ 1*", param_name),
+    
+    # cognitive abilities
+    "gf =~ zPC + zPS + zM + zC",
+    
+    # structural model
+    "ERP ~~ gf",
+    
+    # fix intercepts to zero
+    paste0(param_name, " ~ 0"),
+    "zPC ~ 0",
+    "zPS ~ 0",
+    "zM ~ 0",
+    "zC ~ 0"
+    
+    # variances
+    # "ERP ~~ v_erp*ERP",
+    # "z_latency_memset ~~ v_S_P3*z_latency_memset"
+  )
+  
+  fit = sem(model, data = data, estimator = "MLR", std.lv = FALSE)
+  summary(fit, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
+}
+fit_sem(clean_data, "z_latency_stims_bin1")
+fit_sem(clean_data, "z_latency_stims_bin2")
+fit_sem(clean_data, "z_latency_response_bin1")
 
-model_sternberg_probe <- c(# hierarchical model
-  "ERP =~ 1*z_latency_probe",
-  
-  # cognitive abilities
-  "gf =~ zPC + zPS + zM + zC",
-  
-  # structural model
-  "ERP ~~ gf",
-  
-  # fix intercepts to zero
-  "z_latency_probe ~ 0",
-  "zPC ~ 0",
-  "zPS ~ 0",
-  "zM ~ 0",
-  "zC ~ 0"
-  
-  # variances
-  # "ERP ~~ v_erp*ERP",
-  # "z_latency_probe ~~ v_S_P3*z_latency_probe"
-)
-
-fit_sternberg_probe <- sem(model_sternberg_probe, data = clean_data %>% filter(review_probe >= 1), estimator = "MLR" , missing="fiml", std.lv = FALSE)
-summary(fit_sternberg_probe, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
-
-
-model_sternberg_liesefeld <- c(# hierarchical model
-  "ERP =~ 1*z_latency_liesefeld",
-  
-  # cognitive abilities
-  "gf =~ zPC + zPS + zM + zC",
-  
-  # structural model
-  "ERP ~~ gf",
-  
-  # fix intercepts to zero
-  "z_latency_liesefeld ~ 0",
-  "zPC ~ 0",
-  "zPS ~ 0",
-  "zM ~ 0",
-  "zC ~ 0"
-  
-  # variances
-  # "ERP ~~ v_erp*ERP",
-  # "z_latency_liesefeld ~~ v_S_P3*z_latency_liesefeld"
-)
-
-fit_sternberg_liesefeld <- sem(model_sternberg_liesefeld, data = clean_data, estimator = "MLR" , missing="fiml", std.lv = FALSE)
-summary(fit_sternberg_liesefeld, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
-
-
-model_sternberg_probeauto <- c(# hierarchical model
-  "ERP =~ 1*z_latency_probeauto",
-  
-  # cognitive abilities
-  "gf =~ zPC + zPS + zM + zC",
-  
-  # structural model
-  "ERP ~~ gf",
-  
-  # fix intercepts to zero
-  "z_latency_probeauto ~ 0",
-  "zPC ~ 0",
-  "zPS ~ 0",
-  "zM ~ 0",
-  "zC ~ 0"
-  
-  # variances
-  # "ERP ~~ v_erp*ERP",
-  # "z_latency_probeauto ~~ v_S_P3*z_latency_probeauto"
-)
-
-fit_sternberg_probeauto <- sem(model_sternberg_probeauto, data = clean_data, estimator = "MLR" , missing="fiml", std.lv = FALSE)
-summary(fit_sternberg_probeauto, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
+fit_sem(clean_data, "z_latency_christoph_bin1")

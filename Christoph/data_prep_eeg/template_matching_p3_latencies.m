@@ -34,7 +34,8 @@ GA =  pop_gaverager( ...
             'ExcludeNullBin', 'on', 'SEM', 'on');
 
 times = GA.times;
-
+%times = times - min(times);
+plot(times, GA.bindata(11, :, 2));
 erp_data = zeros([length(ALLERP) size(GA.bindata)]);
 
 for isubject = 1:length(ALLERP)
@@ -44,11 +45,12 @@ end
 [n_subjects, n_chans, n_times, n_bins] = size(erp_data);
 
 % Convert to cell array with conditionsXn_subject entries 
-component_names = ["p3_sternberg_probe"];
+component_names = ["p3_sternberg_response"];
 n_components = length(component_names);
 electrodes = [11]; % We only have one electrode saved in example data
 polarity = ["positive"];
-windows = {[250 700]};
+%windows = {[800 1400]};
+windows = {[250 900]};
 
 % For fitting
 possible_approaches = ["minsq"];
@@ -75,25 +77,35 @@ column_names = {'approach', 'weight', 'penalty', 'normalization', 'use_derivativ
 comb.Properties.VariableNames = column_names;
 
 % If you can use the Parallel Computing Toolbox
-results_mat = run_template_matching(erp_data(:, :, :, 2), times, comb, 1); % Run the third (3) method saved in comb. You can run any 
+results_mat = run_template_matching(erp_data, times, comb, 1); % Run the third (3) method saved in comb. You can run any 
 % results_mat = run_template_matching_serial(erp_data, time_vec, comb, 3); % Much slower!
 
+results = zeros(size(results_mat, 1) * size(results_mat, 2), 2 + size(results_mat, 3));
+for ibin = 1:size(results_mat, 2)
+    for isubject = 1:size(results_mat, 1)
+        results(isubject + size(results_mat, 1) * (ibin - 1) , 1) = ibin;
+        results(isubject + size(results_mat, 1) * (ibin - 1) , 2) = isubject;
+        results(isubject + size(results_mat, 1) * (ibin - 1) , 3:7) = squeeze(results_mat(isubject, ibin, :));
+    end
+end
+ 
 % The results matrix will consist of 5 columns and n_subjects rows
 % the columns will be: a_param, b_param, latency, fit_cor, fit_dist
-writematrix(squeeze(results_mat), "probe_p3_automatic.csv")
+writematrix(squeeze(results), "stims_p3_automatic_odd_even.csv")
 
+%{
 old_latencies = zeros(length(ALLERP), 3);
 
 for isubject = 1:length(ALLERP)
-    old_latencies(isubject, 1) = approx_peak_latency(times, erp_data(isubject, 11, :, 2), [250 900], polarity);
-    old_latencies(isubject, 2) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 700], polarity, 0.5);
-    old_latencies(isubject, 3) = approx_area_latency(times, erp_data(isubject, 11, :, 2), [250 700], polarity, 0.5, true);
+    old_latencies(isubject, 1) = approx_peak_latency(times, erp_data(isubject, 11, :, 1), [800 1400], polarity);
+    old_latencies(isubject, 2) = approx_area_latency(times, erp_data(isubject, 11, :, 1), [800 1400], polarity, 0.5);
+    old_latencies(isubject, 3) = approx_area_latency(times, erp_data(isubject, 11, :, 1), [800 1400], polarity, 0.5, true);
 end
 
-writematrix(squeeze(liesefeld_latencies), "probe_p3_old.csv")
+writematrix(old_latencies, "response_p3_old.csv")
 
 % Initialize the review app
 %review_app
 
 raw_data_ids = getIdsFromFolder(PATH_ERP_AV, '*erp_response*.erp', '^(\d+)_');
-
+%}
