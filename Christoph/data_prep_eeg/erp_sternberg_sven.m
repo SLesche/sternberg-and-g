@@ -16,6 +16,7 @@ mkdir(PATH_ERP_SL)
 mkdir(PATH_ERP_AV)
 
 subject_ids = getIdsFromFolder(PATH_AUTOCLEANED,  'autocleaned_response\.fdt$', '(\d+)_autocleaned_response\.fdt$');
+%subject_ids = getIdsFromFolder(PATH_AUTOCLEANED,  'autocleaned\.fdt$', '(\d+)_autocleaned\.fdt$');
 
 %subject_ids = 901;
 % Create a map for ID to label
@@ -42,7 +43,7 @@ for isubject = 1:length(subject_ids)
         
         %Filter ERP
         %lowpass filter might impact latency of peaks
-        EEG = pop_eegfiltnew(EEG,'hicutoff', 16, 'plotfreqz',0);
+        EEG = pop_eegfiltnew(EEG,'hicutoff', 8, 'plotfreqz',0);
 
         for ievent = 1:length(EEG.event)
             odd_even = EEG.event(ievent).Odd_Even;
@@ -67,12 +68,14 @@ for isubject = 1:length(subject_ids)
         % Create EventList for ERPLab
         EEG  = pop_creabasiceventlist(EEG , 'AlphanumericCleaning', 'on', 'BoundaryNumeric', { -99 }, 'BoundaryString', { 'boundary' } );
         
-        % Create Bins for different conditions
+        % Create Bins for different conditions       
+        %EEG  = pop_binlister(EEG , 'BDF', [PATH_MAIN '\binlister_stims.txt'], 'IndexEL',  1, 'SendEL2', 'Workspace&EEG', 'UpdateEEG', 'on', 'Voutput', 'EEG' );
         EEG  = pop_binlister(EEG , 'BDF', [PATH_MAIN '\binlister_response.txt'], 'IndexEL',  1, 'SendEL2', 'Workspace&EEG', 'UpdateEEG', 'on', 'Voutput', 'EEG' );
         EEG.setname = 'bin';
         
-        % Epoch data
-        EEG = pop_epochbin( EEG , [-1200.0  1000.0],  [ -1200 -1000]);
+        % Epoch data      
+        %EEG = pop_epochbin( EEG , [-200.0  1000.0],  [ -200 0]);
+        EEG = pop_epochbin( EEG , [-1200.0  1000.0],  [ -1200 -8000]);
         EEG.setname =' bin_epoch';
         
         % perform CSD on copy of data set 
@@ -84,6 +87,7 @@ for isubject = 1:length(subject_ids)
         ERP.erpname = [subject '_bin_average'];
         
         % Save ERP set to
+        %ERP = pop_savemyerp(ERP, 'erpname', ERP.erpname, 'filename', [num2str(subject_ids(isubject)) '_erp.erp'], 'filepath', PATH_ERP_AV);
         ERP = pop_savemyerp(ERP, 'erpname', ERP.erpname, 'filename', [num2str(subject_ids(isubject)) '_erp_response.erp'], 'filepath', PATH_ERP_AV);
 
         % Compute ERPs for the CSDs

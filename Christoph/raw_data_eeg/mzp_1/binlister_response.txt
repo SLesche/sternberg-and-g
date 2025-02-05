@@ -1,3 +1,11 @@
 bin 1
 Response
 .{1031; 1032}
+
+bin 2
+Response Odd
+.{1031}
+
+bin 3
+Response Even
+.{1032}

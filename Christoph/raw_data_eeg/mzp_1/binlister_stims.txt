@@ -5,3 +5,19 @@ Mem Set
 bin 2
 Probe
 .{1021; 1022}
+
+bin 3
+Mem Set Odd
+.{1011}
+
+bin 4
+Mem Set Even
+.{1012}
+
+bin 5
+Probe Odd
+.{1021}
+
+bin 6
+Probe Even
+.{1022}
