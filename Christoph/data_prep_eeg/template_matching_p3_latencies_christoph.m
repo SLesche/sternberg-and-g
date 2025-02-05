@@ -49,7 +49,7 @@ component_names = ["p3_sternberg_christoph"];
 n_components = length(component_names);
 electrodes = [11]; % We only have one electrode saved in example data
 polarity = ["positive"];
-windows = {[200 800]};
+windows = {[250 900]};
 
 % For fitting
 possible_approaches = ["minsq"];

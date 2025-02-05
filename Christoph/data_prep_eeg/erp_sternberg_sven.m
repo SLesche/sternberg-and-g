@@ -47,7 +47,7 @@ parfor isubject = 1:length(subject_ids)
         
         %Filter ERP
         %lowpass filter might impact latency of peaks
-        EEG = pop_eegfiltnew(EEG,'hicutoff', 8, 'plotfreqz',0);
+        EEG = pop_eegfiltnew(EEG,'hicutoff', 32, 'plotfreqz',0);
 
         for ievent = 1:length(EEG.event)
             odd_even = EEG.event(ievent).Odd_Even;
