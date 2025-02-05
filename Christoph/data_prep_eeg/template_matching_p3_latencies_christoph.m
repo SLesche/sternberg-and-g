@@ -49,7 +49,7 @@ component_names = ["p3_sternberg_christoph"];
 n_components = length(component_names);
 electrodes = [11]; % We only have one electrode saved in example data
 polarity = ["positive"];
-windows = {[250 800]};
+windows = {[200 800]};
 
 % For fitting
 possible_approaches = ["minsq"];
@@ -76,12 +76,23 @@ column_names = {'approach', 'weight', 'penalty', 'normalization', 'use_derivativ
 comb.Properties.VariableNames = column_names;
 
 % If you can use the Parallel Computing Toolbox
-results_mat = run_template_matching(erp_data(:, :, :, 1), times, comb, 1); % Run the third (3) method saved in comb. You can run any 
+results_mat = run_template_matching(erp_data, times, comb, 1); % Run the third (3) method saved in comb. You can run any 
 % results_mat = run_template_matching_serial(erp_data, time_vec, comb, 3); % Much slower!
+
+results = zeros(size(results_mat, 1) * size(results_mat, 2), 2 + size(results_mat, 3));
+for ibin = 1:size(results_mat, 2)
+    for isubject = 1:size(results_mat, 1)
+        results(isubject + size(results_mat, 1) * (ibin - 1) , 1) = ibin;
+        results(isubject + size(results_mat, 1) * (ibin - 1) , 2) = isubject;
+        results(isubject + size(results_mat, 1) * (ibin - 1) , 3:7) = squeeze(results_mat(isubject, ibin, :));
+    end
+end
+writematrix(squeeze(results), "stims_p3_automatic_odd_even_christoph.csv")
 
 % The results matrix will consist of 5 columns and n_subjects rows
 % the columns will be: a_param, b_param, latency, fit_cor, fit_dist
 
+%{
 liesefeld_latencies = zeros( length(ALLERP), 1);
 subject_order = strings(length(ALLERP), 1);
 for isubject = 1:length(ALLERP)
@@ -94,3 +105,4 @@ writematrix(subject_order, "subject_order_christoph.csv")
 review_app
 
 raw_data_ids = getIdsFromFolder(PATH_ERP_AV, '*erp_response*.erp', '^(\d+)_');
+%}
