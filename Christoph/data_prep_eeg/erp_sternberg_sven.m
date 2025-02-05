@@ -2,6 +2,7 @@
 clear all
 
 % define paths 
+addpath('C:\Users\Sven\Documents\projects\research\promotion_mental_speed\decision-or-response-analysis\functions')
 PATH_MAIN = 'C:\Users\Sven\Documents\projects\research\promotion_mental_speed\sternberg-and-g\Christoph\raw_data_eeg\mzp_1';
 % 
 % PATH_AUTOCLEANED        = 'E:\Exp26\preprocessed_data_average_WM\MZP 1\autocleaned\';
@@ -15,8 +16,8 @@ PATH_ERP_SL                = fullfile(PATH_MAIN, '\erp\SL/');
 mkdir(PATH_ERP_SL)
 mkdir(PATH_ERP_AV)
 
-subject_ids = getIdsFromFolder(PATH_AUTOCLEANED,  'autocleaned_response\.fdt$', '(\d+)_autocleaned_response\.fdt$');
-%subject_ids = getIdsFromFolder(PATH_AUTOCLEANED,  'autocleaned\.fdt$', '(\d+)_autocleaned\.fdt$');
+%subject_ids = getIdsFromFolder(PATH_AUTOCLEANED,  'autocleaned_response\.fdt$', '(\d+)_autocleaned_response\.fdt$');
+subject_ids = getIdsFromFolder(PATH_AUTOCLEANED,  'autocleaned\.fdt$', '(\d+)_autocleaned\.fdt$');
 
 %subject_ids = 901;
 % Create a map for ID to label
@@ -30,11 +31,14 @@ label_number_map = [
 ];
 label_number_map = containers.Map(label_number_map(:, 1), label_number_map(:, 2));
 
-for isubject = 1:length(subject_ids)
+parfor isubject = 1:length(subject_ids)
     % Load data
     subject = num2str(subject_ids(isubject));
+
+    datafile = '';
     
-    datafile = [subject '_autocleaned_response.set'];
+    %datafile = [subject '_autocleaned_response.set'];
+    datafile = [subject '_autocleaned.set'];
     
     if isfile([PATH_AUTOCLEANED datafile]) == 1
         
@@ -69,13 +73,13 @@ for isubject = 1:length(subject_ids)
         EEG  = pop_creabasiceventlist(EEG , 'AlphanumericCleaning', 'on', 'BoundaryNumeric', { -99 }, 'BoundaryString', { 'boundary' } );
         
         % Create Bins for different conditions       
-        %EEG  = pop_binlister(EEG , 'BDF', [PATH_MAIN '\binlister_stims.txt'], 'IndexEL',  1, 'SendEL2', 'Workspace&EEG', 'UpdateEEG', 'on', 'Voutput', 'EEG' );
-        EEG  = pop_binlister(EEG , 'BDF', [PATH_MAIN '\binlister_response.txt'], 'IndexEL',  1, 'SendEL2', 'Workspace&EEG', 'UpdateEEG', 'on', 'Voutput', 'EEG' );
+        EEG  = pop_binlister(EEG , 'BDF', [PATH_MAIN '\binlister_stims.txt'], 'IndexEL',  1, 'SendEL2', 'Workspace&EEG', 'UpdateEEG', 'on', 'Voutput', 'EEG' );
+        %EEG  = pop_binlister(EEG , 'BDF', [PATH_MAIN '\binlister_response.txt'], 'IndexEL',  1, 'SendEL2', 'Workspace&EEG', 'UpdateEEG', 'on', 'Voutput', 'EEG' );
         EEG.setname = 'bin';
         
         % Epoch data      
-        %EEG = pop_epochbin( EEG , [-200.0  1000.0],  [ -200 0]);
-        EEG = pop_epochbin( EEG , [-1200.0  1000.0],  [ -1200 -8000]);
+        EEG = pop_epochbin( EEG , [-200.0  1000.0],  [ -200 0]);
+        %EEG = pop_epochbin( EEG , [-1200.0  1000.0],  [ -1200 -800]);
         EEG.setname =' bin_epoch';
         
         % perform CSD on copy of data set 
@@ -87,8 +91,8 @@ for isubject = 1:length(subject_ids)
         ERP.erpname = [subject '_bin_average'];
         
         % Save ERP set to
-        %ERP = pop_savemyerp(ERP, 'erpname', ERP.erpname, 'filename', [num2str(subject_ids(isubject)) '_erp.erp'], 'filepath', PATH_ERP_AV);
-        ERP = pop_savemyerp(ERP, 'erpname', ERP.erpname, 'filename', [num2str(subject_ids(isubject)) '_erp_response.erp'], 'filepath', PATH_ERP_AV);
+        ERP = pop_savemyerp(ERP, 'erpname', ERP.erpname, 'filename', [num2str(subject_ids(isubject)) '_erp.erp'], 'filepath', PATH_ERP_AV);
+        %ERP = pop_savemyerp(ERP, 'erpname', ERP.erpname, 'filename', [num2str(subject_ids(isubject)) '_erp_response.erp'], 'filepath', PATH_ERP_AV);
 
         % Compute ERPs for the CSDs
         %ERP_csd = pop_averager( EEG_csd , 'Criterion', 'all', 'ExcludeBoundary', 'off', 'SEM', 'on' );
