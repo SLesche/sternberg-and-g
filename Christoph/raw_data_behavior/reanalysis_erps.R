@@ -21,9 +21,13 @@ colnames(stims_p3) = c("bin", "erp_num", "aparam", "bparam", "latency", "fitcor"
 colnames(christoph_p3) = c("bin", "erp_num", "aparam", "bparam", "latency", "fitcor", "fitdist")
 
 cutoff = 0.3
+bpar_cutoff = 2
 response_p3 <- response_p3 %>% 
   mutate(
     latency = ifelse(fitcor < cutoff, NA, latency),
+  ) %>% 
+  mutate(
+    latency = ifelse(bparam > bpar_cutoff | bparam < 1/bpar_cutoff, NA, latency),
   ) %>% 
   pivot_wider(names_from = bin, id_cols = erp_num, values_from = -c(bin, erp_num), names_prefix = "response_bin") %>% 
   mutate(Subject = subject_order$V1)
@@ -32,12 +36,18 @@ stims_p3 <- stims_p3 %>%
   mutate(
     latency = ifelse(fitcor < cutoff, NA, latency),
   ) %>% 
+  mutate(
+    latency = ifelse(bparam > bpar_cutoff | bparam < 1/bpar_cutoff, NA, latency),
+  ) %>% 
   pivot_wider(names_from = bin, id_cols = erp_num, values_from = -c(bin, erp_num), names_prefix = "stims_bin") %>%
   mutate(Subject = subject_order$V1)
 
 christoph_p3 <- christoph_p3 %>% 
   mutate(
     latency = ifelse(fitcor < cutoff, NA, latency),
+  ) %>% 
+  mutate(
+    latency = ifelse(bparam > bpar_cutoff | bparam < 1/bpar_cutoff, NA, latency),
   ) %>% 
   pivot_wider(names_from = bin, id_cols = erp_num, values_from = -c(bin, erp_num), names_prefix = "christoph_bin") %>%
   mutate(Subject = parse_number(subject_order_christoph$V1))
@@ -110,3 +120,36 @@ fit_sem(clean_data, "z_latency_stims_bin2")
 fit_sem(clean_data, "z_latency_response_bin1")
 
 fit_sem(clean_data, "z_latency_christoph_bin1")
+
+
+fit_sem_odd_even <- function(data, even_name, odd_name){
+  model = c(# hierarchical model
+    paste0("ERP =~ 1*", even_name, " + 1*", odd_name),
+
+    # cognitive abilities
+    "gf =~ zPC + zPS + zM + zC",
+    
+    # structural model
+    "ERP ~~ gf",
+    
+    # fix intercepts to zero
+    paste0(even_name, " ~ 0"),
+    paste0(odd_name, " ~ 0"),
+    "zPC ~ 0",
+    "zPS ~ 0",
+    "zM ~ 0",
+    "zC ~ 0"
+    
+    # variances
+    # "ERP ~~ v_erp*ERP",
+    # "z_latency_memset ~~ v_S_P3*z_latency_memset"
+  )
+  
+  fit = sem(model, data = data, estimator = "MLR", std.lv = FALSE)
+  summary(fit, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
+}
+
+fit_sem_odd_even(clean_data, "z_latency_stims_bin3", "z_latency_stims_bin4")
+fit_sem_odd_even(clean_data, "z_latency_stims_bin5", "z_latency_stims_bin6")
+fit_sem_odd_even(clean_data, "z_latency_response_bin2", "z_latency_response_bin3")
+fit_sem_odd_even(clean_data, "z_latency_christoph_bin2", "z_latency_christoph_bin3")

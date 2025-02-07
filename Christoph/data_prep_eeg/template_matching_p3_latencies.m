@@ -35,7 +35,7 @@ GA =  pop_gaverager( ...
 
 times = GA.times;
 %times = times - min(times);
-plot(times, GA.bindata(11, :, 2));
+plot(times, GA.bindata(11, :, 3));
 erp_data = zeros([length(ALLERP) size(GA.bindata)]);
 
 for isubject = 1:length(ALLERP)
