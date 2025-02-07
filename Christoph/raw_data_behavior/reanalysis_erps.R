@@ -153,3 +153,42 @@ fit_sem_odd_even(clean_data, "z_latency_stims_bin3", "z_latency_stims_bin4")
 fit_sem_odd_even(clean_data, "z_latency_stims_bin5", "z_latency_stims_bin6")
 fit_sem_odd_even(clean_data, "z_latency_response_bin2", "z_latency_response_bin3")
 fit_sem_odd_even(clean_data, "z_latency_christoph_bin2", "z_latency_christoph_bin3")
+
+
+wacky_model = c(# hierarchical model
+  "ERP_stims =~ 1*z_latency_stims_bin3 + 1*z_latency_stims_bin4",
+  
+  "ERP_resp =~ 1*z_latency_response_bin2 + 1*z_latency_response_bin3",
+  
+  "ERP_probe =~ 1*z_latency_christoph_bin2 + 1*z_latency_christoph_bin3",
+  
+  
+  # cognitive abilities
+  "gf =~ zPC + zPS + zM + zC",
+  
+  "ERP_stims ~~ ERP_resp + ERP_probe",
+  "ERP_resp ~~ ERP_probe",
+  
+  # structural model
+  "gf ~ ERP_stims + ERP_resp + ERP_probe",
+  
+  # fix intercepts to zero
+  "z_latency_stims_bin3 ~ 0",
+  "z_latency_stims_bin4 ~ 0",
+  "z_latency_christoph_bin2 ~ 0",
+  "z_latency_christoph_bin3 ~ 0",
+  "z_latency_response_bin2 ~ 0",
+  "z_latency_response_bin3 ~ 0",
+  "zPC ~ 0",
+  "zPS ~ 0",
+  "zM ~ 0",
+  "zC ~ 0"
+  
+  # variances
+  # "ERP ~~ v_erp*ERP",
+  # "z_latency_memset ~~ v_S_P3*z_latency_memset"
+)
+
+fit = sem(wacky_model, data = clean_data, estimator = "MLR", std.lv = FALSE, orthogonal = TRUE)
+
+summary(fit, fit.measures=TRUE,standardized = TRUE,rsquare=T, ci = TRUE)
