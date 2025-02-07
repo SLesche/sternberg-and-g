@@ -19,8 +19,8 @@ PATH_MAIN = 'C:\Users\Sven\Documents\projects\research\promotion_mental_speed\st
 % 
 PATH_ERP_AV                = fullfile(PATH_MAIN, '\erp\AV/');
 
-%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
-list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
+list_erps = dir(fullfile(PATH_ERP_AV, '**', '*erp_response*.erp'));
+%list_erps = dir(fullfile(PATH_ERP_AV, '**', '*_erp.erp'));
 
 arr = {};
 for i = 1:length(list_erps)
@@ -34,7 +34,7 @@ GA =  pop_gaverager( ...
             'ExcludeNullBin', 'on', 'SEM', 'on');
 
 times = GA.times;
-%times = times - min(times);
+times = times - min(times);
 plot(times, GA.bindata(11, :, 3));
 erp_data = zeros([length(ALLERP) size(GA.bindata)]);
 
@@ -91,7 +91,8 @@ end
  
 % The results matrix will consist of 5 columns and n_subjects rows
 % the columns will be: a_param, b_param, latency, fit_cor, fit_dist
-writematrix(squeeze(results), "stims_p3_automatic_odd_even.csv")
+%writematrix(squeeze(results), "stims_p3_automatic_odd_even.csv")
+writematrix(squeeze(results), "response_p3_automatic_odd_even.csv")
 
 %{
 old_latencies = zeros(length(ALLERP), 3);
